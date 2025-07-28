@@ -1,0 +1,56 @@
+# File: Dockerfile.fastbot-ros2-gazebo
+
+# Base image with GUI and Gazebo support
+FROM osrf/ros:humble-desktop
+
+# Change the default shell to Bash
+SHELL [ "/bin/bash" , "-c" ]
+
+# Install Gazebo 11 and other dependencies
+RUN apt-get update && apt-get install -y \
+  ros-humble-gazebo-ros-pkgs \
+  ros-humble-gazebo-ros2-control \
+  ros-humble-ros2-control \
+  ros-humble-ros2-controllers \
+  ros-humble-joint-state-publisher \
+  ros-humble-robot-state-publisher \
+  ros-humble-robot-localization \
+  ros-humble-xacro \
+  ros-humble-tf2-ros \
+  ros-humble-tf2-tools \
+  ros-humble-ros2-control \
+  ros-humble-ros2-controllers \
+  ros-humble-rmw-cyclonedds-cpp \
+  python3-colcon-common-extensions \
+  && rm -rf /var/lib/apt/lists/*
+
+# Create workspace and download simulation repository
+
+RUN source /opt/ros/humble/setup.bash \
+ && mkdir -p /ros2_ws/src \
+ && cd /ros2_ws/src 
+
+# Create necessary directories
+# RUN mkdir -p /ros2_ws/src/fastbot_gazebo
+
+# Copy your simulation package
+COPY fastbot/fastbot_gazebo/ /ros2_ws/src/fastbot_gazebo
+COPY fastbot/fastbot_description/ /ros2_ws/src/fastbot_description
+
+
+# Build the Colcon workspace and ensure it's sourced
+RUN source /opt/ros/humble/setup.bash \
+ && cd /ros2_ws \
+ && colcon build --symlink-install
+
+RUN echo "source /ros2_ws/install/setup.bash" >> ~/.bashrc
+
+# Set up a workspace directory
+WORKDIR /ros2_ws/
+
+# Set environment variables
+ENV ROS_DOMAIN_ID=1
+ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+
+# Launch your Gazebo simulation
+#CMD ["bash"]

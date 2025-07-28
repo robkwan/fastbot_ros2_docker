@@ -1,0 +1,183 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robot Control Interface</title>
+    <link rel="icon" href="data:,">
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- ROS stuff -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/eventemitter2/lib/eventemitter2.min.js"></script>
+    <script src="./libs/roslib.min.js"></script>
+    <!-- 2D visualization -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/easeljs/lib/easeljs.min.js"></script>
+    <script src="./ros2d.js"></script>
+    <!-- 3D visualization -->
+    <script src="./libs/three.min.js"></script>
+    <script src="./libs/ColladaLoader.js"></script>
+    <script src="./libs/ColladaLoader2.js"></script>
+    <script src="./libs/STLLoader.js"></script>
+    <script src="./libs/ros3d.min.js"></script>
+    <script src="./mjpegcanvas.min.js"></script>
+    <!-- Vuejs -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+
+    <style>
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #div3DViewer,
+        #divCamera {
+            width: 100%;
+            height: 300px;
+        }
+
+        #dragstartzone {
+            position: relative;
+            display: inline-block;
+            width: 200px;
+            height: 200px;
+            border: 1px solid #333;
+            border-radius: 50%;
+            z-index: 10;
+            -moz-user-select: -moz-none;
+            -khtml-user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #dragCircle {
+            position: absolute;
+            z-index: 9;
+            border: 1px solid transparent;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 30%);
+            -moz-user-select: -moz-none;
+            -khtml-user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #dragCircle:hover {
+            background-color: lightcoral;
+        }
+    </style>
+</head>
+
+
+<body>
+    <div id="app" class="container">
+        <h3 class="text-center">Robot Control Interface</h3>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <h2 class="text-center">Connection Status</h2>
+                    <hr>
+                    <!--<p>Debug Connected State: {{ connected }}</p>-->
+                    <p v-if="!connected" class="text-danger">Not connected!</p>
+                    <p v-if="connected" class="text-success">Connected!</p>
+                    <label>ROSBridge Address:</label>
+                    <input type="text" v-model="rosbridge_address" class="form-control">
+                    <button class="btn btn-success mt-2" @click="connect" v-if="!connected">Connect</button>
+                    <button class="btn btn-danger mt-2" @click="disconnect" v-if="connected">Disconnect</button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h2 class="text-center">Joystick</h2>
+                        <hr>
+                        <p>Some actions for the robot</p>
+                        <div id="dragstartzone" @mousedown="startDrag" @mousemove="doDrag"></div>
+                        <div id="dragCircle" :style="dragCircleStyle"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="text-center">Robot's Data</h2>
+                        <hr>
+                        <!--<h2 class="text-center">Joystick values</h2>
+                        <hr />
+                        <p>Vertical: {{ joystick.vertical.toFixed(3) }}</p>
+                        <br />
+                        <p>Horizontal: {{ joystick.horizontal.toFixed(3) }}</p>-->
+                        <h5>Current Speed</h5>
+                        <div v-if="isAutonomous">
+                            <p>linear.x: {{ estimatedSpeed.x.toFixed(2) }} m/s</p>
+                            <p>angular.z: {{ estimatedSpeed.z.toFixed(2) }} r/s</p>
+                        </div>
+                        <div v-else>
+                            <p>linear.x: {{ joystick.vertical.toFixed(2) }} m/s</p>
+                            <p>angular.z: {{ -joystick.horizontal.toFixed(2) }} r/s</p>
+                        </div>
+                        <h5>Current Position</h5>
+                        <p>X: {{ position.x.toFixed(2) }}</p>
+                        <p>Y: {{ position.y.toFixed(2) }}</p>
+                        <p>Z: {{ position.z.toFixed(2) }}</p>
+                    </div>
+                </div>
+            </div>
+            <!--<div class="col-md-4">
+                <h5>Current Speed</h5>
+                <p>{{ currentSpeed }} m/s</p>
+                <h5>Current Position</h5>
+                <p>X: {{ position.x.toFixed(2) }}</p>
+                <p>Y: {{ position.y.toFixed(2) }}</p>
+                <p>Z: {{ position.z.toFixed(2) }}</p>
+            </div>-->
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <h5>3D Model in Map</h5>
+                <div id="div3DViewer"></div>
+            </div>
+            <div class="col-md-6">
+                <h5>Camera View</h5>
+                <div id="divCamera"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <h2 class="text-center">Waypoint Navigation</h2>
+                    <hr>
+                    <p>{{ controller_status }}</p>
+                    <!--<button class="btn btn-primary" @click="goToWaypoint(1)">To Sofa</button>
+                    <button class="btn btn-primary" @click="goToWaypoint(2)">To Kitchen</button>
+                    <button class="btn btn-primary" @click="goToWaypoint(3)">To Living Room</button>-->
+
+                    <!-- FLEX ROW OF BUTTONS -->
+                    <div class="d-flex justify-content-center">
+                        <button class="btn btn-primary mx-1" @click="goToWaypoint(1)">To Sofa</button>
+                        <button class="btn btn-success mx-1" @click="goToWaypoint(2)">To Kitchen</button>
+                        <button class="btn btn-warning mx-1" @click="goToWaypoint(3)">To Living Room</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="text/javascript">
+        // We could have loaded main.js simply with:
+        //  <script type="text/javascript" src="main.js">
+        //
+        // BUT we were having caching-related problems.
+        // Loading main.js with a Date.now() in the URL we avoid using cache
+
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = 'main.js?v=16.' + Date.now();
+        document.head.appendChild(script);
+    </script>
+
+</body>
+
+</html>
