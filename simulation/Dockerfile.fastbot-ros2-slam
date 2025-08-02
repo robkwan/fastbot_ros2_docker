@@ -19,6 +19,7 @@ RUN apt update && apt install -y \
     ros-humble-ros2-controllers \
     ros-humble-rmw-cyclonedds-cpp \
     ros-humble-cartographer \
+    ros-humble-cartographer-ros \
     ros-humble-nav2-amcl \             
     ros-humble-nav2-map-server \       
     ros-humble-nav2-controller \       

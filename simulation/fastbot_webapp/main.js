@@ -6,7 +6,7 @@ var app = new Vue({
         ros: null,
         logs: [],
         loading: false,
-        rosbridge_address: 'wss://i-0023b6c127254990a.robotigniteacademy.com/4813adec-a8c0-472c-abac-25b08d7665b0/rosbridge/',
+        rosbridge_address: 'ws://172.17.0.1:9090/rosbridge',
         port: '9090',
         // 3D stuff
         viewer: null,
@@ -46,7 +46,7 @@ var app = new Vue({
     },
     // helper methods to connect to ROS
     methods: {
-        connect: function() {
+        connect: function () {
             this.loading = true
             this.ros = new ROSLIB.Ros({
                 url: this.rosbridge_address,
@@ -58,14 +58,14 @@ var app = new Vue({
                 this.connected = true
                 console.log("connected state:", this.connected);
                 this.loading = false
-                //this.setupMap()
+                this.setupMap()
                 this.setup3DViewer()
                 this.setupMapIn3DViewer()
-                this.setupCamera()
+                //this.setupCamera()
                 this.pubInterval = setInterval(this.publish, 100)
-                this.subscribeToOdometry() 
+                this.subscribeToOdometry()
                 this.subscribeToControllerStatus()
-            }) 
+            })
             this.ros.on('error', (error) => {
                 console.log('Error connecting to ROSBridge:', error)
                 this.logs.unshift((new Date()).toTimeString() + ` - Error: ${error}`)
@@ -79,10 +79,10 @@ var app = new Vue({
                 clearInterval(this.pubInterval)
             })
         },
-        publish: function() {
+        publish: function () {
             let topic = new ROSLIB.Topic({
                 ros: this.ros,
-                name: '/fastbot_1/cmd_vel',
+                name: '/fastbot/cmd_vel',
                 messageType: 'geometry_msgs/Twist'
             })
             let message = new ROSLIB.Message({
@@ -91,10 +91,10 @@ var app = new Vue({
             })
             topic.publish(message)
         },
-        disconnect: function() {
+        disconnect: function () {
             this.ros.close()
         },
-       setupMap() {
+        setupMap() {
             // Initialize map viewer
             this.mapViewer = new ROS2D.Viewer({
                 divID: 'map',
@@ -142,7 +142,7 @@ var app = new Vue({
 
             // Add a grid.
             this.viewer.addObject(new ROS3D.Grid({
-                color:'#0181c4',
+                color: '#0181c4',
                 cellSize: 0.5,
                 num_cells: 20
             }))
@@ -155,10 +155,10 @@ var app = new Vue({
 
             this.viewer.addObject(new ROS3D.Axes({
                 tfClient: this.tfClient,
-                frameId: 'fastbot_1_base_link',
+                frameId: 'fastbot_base_link',
                 size: 0.5
             }));
-            
+
             // Setup a client to listen to TFs.
             this.tfClient = new ROSLIB.TFClient({
                 ros: this.ros,
@@ -171,7 +171,7 @@ var app = new Vue({
             // Setup the URDF client.
             this.urdfClient = new ROS3D.UrdfClient({
                 ros: this.ros,
-                param: '/fastbot_1_robot_state_publisher:robot_description',
+                param: '/fastbot_robot_state_publisher:robot_description',
                 tfClient: this.tfClient,
                 // We use "path: location.origin + location.pathname"
                 // instead of "path: window.location.href" to remove query params,
@@ -204,7 +204,7 @@ var app = new Vue({
                         host: host, // Use the host without port
                         width: 320,
                         height: 240,
-                        topic: '/fastbot_1/camera/image_raw',
+                        topic: '/fastbot_camera/image_raw',
                         ssl: true,
                     });
                 } else {
@@ -217,7 +217,7 @@ var app = new Vue({
         subscribeToOdometry() {
             let topic = new ROSLIB.Topic({
                 ros: this.ros,
-                name: '/fastbot_1/odom',
+                name: '/fastbot/odom',
                 messageType: 'nav_msgs/msg/Odometry'
             });
             topic.subscribe((message) => {
@@ -237,9 +237,9 @@ var app = new Vue({
                 if (this.lastPosition && this.lastTime) {
                     const dx = this.position.x - this.lastPosition.x;
                     const dy = this.position.y - this.lastPosition.y;
-                
+
                     let dyaw = yaw - this.lastYaw;
-      
+
                     // Normalize to [-PI, PI]
                     if (dyaw > Math.PI) dyaw -= 2 * Math.PI;
                     if (dyaw < -Math.PI) dyaw += 2 * Math.PI;
@@ -251,13 +251,13 @@ var app = new Vue({
                     }
                 }
 
-            this.lastPosition = { x: this.position.x, y: this.position.y };
-            this.lastYaw = yaw;
-            this.lastTime = now;
+                this.lastPosition = { x: this.position.x, y: this.position.y };
+                this.lastYaw = yaw;
+                this.lastTime = now;
 
-            // Update 3D model position based on odometry data
-            this.update3DModelPosition(this.pose);
-            
+                // Update 3D model position based on odometry data
+                this.update3DModelPosition(this.pose);
+
             });
         },
         update3DModelPosition(pose) {
@@ -266,12 +266,12 @@ var app = new Vue({
 
             if (this.urdfClient && this.urdfClient.rootObject) {
                 let model = this.urdfClient.rootObject; // Use the rootObject directly
-        
+
                 // Snap the position to the nearest grid point
                 model.position.x = Math.round(pose.position.x / gridSize) * gridSize;
                 model.position.y = Math.round(pose.position.y / gridSize) * gridSize;
                 model.position.z = pose.position.z; // Keep the z position as is if not affected by the grid
-        
+
                 // Set the orientation using quaternion
                 model.quaternion.set(pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w);
             }
@@ -322,7 +322,7 @@ var app = new Vue({
                 //    model.position.x += moveX;
                 //    model.position.y += moveY;
 
-                    // Optionally ensure the model stays within grid boundaries
+                // Optionally ensure the model stays within grid boundaries
                 //    model.position.x = Math.max(minX, Math.min(maxX, model.position.x));
                 //    model.position.y = Math.max(minY, Math.min(maxY, model.position.y));
                 //}
@@ -406,7 +406,7 @@ var app = new Vue({
             });
         }
     },
-     mounted() {
+    mounted() {
         // page is ready
         window.addEventListener('mouseup', this.stopDrag)
     },
