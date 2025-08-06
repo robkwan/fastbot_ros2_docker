@@ -6,7 +6,7 @@ var app = new Vue({
         ros: null,
         logs: [],
         loading: false,
-        rosbridge_address: 'ws://172.17.0.1:9090/rosbridge',
+        rosbridge_address: 'wss://i-003ae4e1d8556fb76.robotigniteacademy.com/4ee87bce-228a-477d-9742-336f5bd33e10/rosbridge/',
         port: '9090',
         // 3D stuff
         viewer: null,
@@ -58,9 +58,9 @@ var app = new Vue({
                 this.connected = true
                 console.log("connected state:", this.connected);
                 this.loading = false
-                this.setupMap()
+                //this.setupMap()
                 this.setup3DViewer()
-                this.setupMapIn3DViewer()
+                //this.setupMapIn3DViewer()
                 //this.setupCamera()
                 this.pubInterval = setInterval(this.publish, 100)
                 this.subscribeToOdometry()
@@ -137,7 +137,7 @@ var app = new Vue({
                 width: 400,
                 height: 300,
                 antialias: true,
-                fixedFrame: 'map' //'fastbot_1_odom'
+                fixedFrame: 'fastbot_odom' //'map' //'fastbot_1_odom'
             })
 
             // Add a grid.
@@ -165,7 +165,7 @@ var app = new Vue({
                 angularThres: 0.01,
                 transThres: 0.01,
                 rate: 10.0,
-                fixedFrame: 'map' //'fastbot_1_base_link'
+                fixedFrame: 'fastbot_base_link' //'map' //'fastbot_1_base_link'
             })
 
             // Setup the URDF client.
@@ -221,9 +221,11 @@ var app = new Vue({
                 messageType: 'nav_msgs/msg/Odometry'
             });
             topic.subscribe((message) => {
+                console.log("RAW ODOM MESSAGE RECEIVED:", message);
                 const now = Date.now(); // milliseconds
                 this.pose = message.pose.pose;
                 this.position = message.pose.pose.position;
+                console.log(this.position)
                 const quat = message.pose.pose.orientation;
 
                 // Convert quaternion to yaw (Z-axis rotation)
