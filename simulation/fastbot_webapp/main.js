@@ -61,7 +61,7 @@ var app = new Vue({
                 //this.setupMap()
                 this.setup3DViewer()
                 //this.setupMapIn3DViewer()
-                //this.setupCamera()
+                this.setupCamera()
                 this.pubInterval = setInterval(this.publish, 100)
                 this.subscribeToOdometry()
                 this.subscribeToControllerStatus()

@@ -55,8 +55,8 @@ echo "$(date +'[%Y-%m-%d %T]') Starting tf2_web_republisher_py..."
 ros2 run tf2_web_republisher_py tf2_web_republisher &
 
 #Launch web video server
-#echo "$(date +'[%Y-%m-%d %T]') Starting web video server..."
-#ros2 run web_video_server web_video_server --ros-args -p port:=11315 &
+echo "$(date +'[%Y-%m-%d %T]') Starting web video server..."
+ros2 run web_video_server web_video_server --ros-args -p port:=11315 &
 
 # Keep the container running
 echo "$(date +'[%Y-%m-%d %T]') All services started. Keeping container alive..."
