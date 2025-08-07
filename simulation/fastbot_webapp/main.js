@@ -202,8 +202,8 @@ var app = new Vue({
                     let viewer = new MJPEGCANVAS.Viewer({
                         divID: 'divCamera',
                         host: host, // Use the host without port
-                        width: 800, //320,
-                        height: 800, //240,
+                        width: 400, //800, //320,
+                        height: 400, //800, //240,
                         topic: '/fastbot_camera/image_raw',
                         ssl: true,
                     });
