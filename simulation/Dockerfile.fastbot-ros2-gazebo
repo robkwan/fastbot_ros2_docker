@@ -17,8 +17,6 @@ RUN apt-get update && apt-get install -y \
   ros-humble-xacro \
   ros-humble-tf2-ros \
   ros-humble-tf2-tools \
-  ros-humble-ros2-control \
-  ros-humble-ros2-controllers \
   ros-humble-rmw-cyclonedds-cpp \
   python3-colcon-common-extensions \
   libx11-dev \
@@ -53,8 +51,7 @@ RUN apt-get update && apt-get install -y \
 ENV QT_XCB_GLUE_ALWAYS_IN_USE=1
 # ... after installing packages ...
 ENV QT_X11_NO_MITSHM=1
-#ENV GAZEBO_MODEL_PATH=${GAZEBO_MODEL_PATH}:/ros2_ws/src/
-ENV GAZEBO_MODEL_PATH=/root/.gazebo:/ros2_ws/install/fastbot_description/share/fastbot_description:/ros2_ws/src/fastbot_description/onshape/assets:/ros2_ws/src/fastbot_description/models/meshes:/ros2_ws/src/fastbot_description/urdf
+ENV GAZEBO_MODEL_PATH=/.gazebo/models:/ros2_ws/src/fastbot_description/onshape/assets:/ros2_ws/src/fastbot_description/models/meshes:/ros2_ws/src/fastbot_description/models/urdf
 ENV DISPLAY=:1
 ENV GAZEBO_MASTER_URI=${GAZEBO_MASTER_URI}
 
@@ -62,10 +59,11 @@ ENV GAZEBO_MASTER_URI=${GAZEBO_MASTER_URI}
 
 RUN source /opt/ros/humble/setup.bash \
  && mkdir -p /ros2_ws/src \
- && cd /ros2_ws/src 
+ && cd /ros2_ws/src
 
 # Create necessary directories
-# RUN mkdir -p /ros2_ws/src/fastbot_gazebo
+
+RUN mkdir -p /ros2_ws/src/fastbot_gazebo
 RUN mkdir -p /.gazebo/models/fastbot_description
 RUN mkdir -p /.gazebo/models/meshes/meshes
 RUN mkdir -p /.gazebo/models/urdf
@@ -73,10 +71,12 @@ RUN mkdir -p /.gazebo/models/urdf
 # Copy your simulation package
 COPY fastbot/fastbot_gazebo/ /ros2_ws/src/fastbot_gazebo
 COPY fastbot/fastbot_description/ /ros2_ws/src/fastbot_description
+
+COPY fastbot/fastbot_gazebo/models /.gazebo/models
 COPY fastbot/fastbot_description/ /.gazebo/models/fastbot_description
 COPY fastbot/fastbot_description/models/meshes /.gazebo/models/meshes/meshes
 COPY fastbot/fastbot_description/models/urdf /.gazebo/models/urdf
-COPY fastbot/fastbot_gazebo/models /.gazebo/models
+
 # Build the Colcon workspace and ensure it's sourced
 RUN source /opt/ros/humble/setup.bash \
  && cd /ros2_ws \

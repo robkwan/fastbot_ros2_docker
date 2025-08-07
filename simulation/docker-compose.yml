@@ -22,9 +22,8 @@ services:
       - QT_X11_NO_MITSHM=1
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-      - $HOME/ros2_ws/install/fastbot_description/share/fastbot_description/onshape/assets:/assets
-      - $HOME/ros2_ws/install/fastbot_description/share/fastbot_description/models:/models
-      - $HOME/.gazebo/models:/.gazebo/models
+      - $HOME/ros2_ws/src/fastbot_ros2_docker/simulation/fastbot/fastbot_description/onshape/assets:/assets
+      - $HOME/ros2_ws/src/fastbot_ros2_docker/simulation/fastbot/fastbot_description/models:/models
       - $HOME/.Xauthority:/root/.Xauthority:rw
     command: bash -c "cd /ros2_ws && colcon build && source install/setup.bash && ros2 launch fastbot_gazebo one_fastbot_room.launch.py"
 
@@ -45,5 +44,7 @@ services:
     container_name: fastbot-ros2-webapp
     ports:
       - "7000:80"
+      - "9090:9090"
+      - "11315:11315"
     network_mode: bridge
     privileged: true
