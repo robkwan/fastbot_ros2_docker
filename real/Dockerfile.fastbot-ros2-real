@@ -1,0 +1,44 @@
+# File: Dockerfile.fastbot-ros2-slam
+# Base image
+FROM osrf/ros:humble-desktop
+
+# Change the default shell to Bash
+SHELL [ "/bin/bash" , "-c" ]
+
+RUN apt update && apt install -y \
+    ros-humble-ros2-control \
+    ros-humble-ros2-controllers \
+    ros-humble-joint-state-publisher \
+    ros-humble-robot-state-publisher \
+    ros-humble-xacro \
+    ros-humble-tf2-ros \
+    ros-humble-tf2-tools \
+    ros-humble-rmw-cyclonedds-cpp \
+    python3-colcon-common-extensions \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create workspace and download simulation repository
+
+RUN source /opt/ros/humble/setup.bash \
+ && mkdir -p /ros2_ws/src/fastbot_bringup \
+ && cd /ros2_ws/src 
+
+# Copy your simulation package
+COPY ./fastbot_bringup/ /ros2_ws/src/fastbot_bringup
+
+# Build the Colcon workspace and ensure it's sourced
+RUN source /opt/ros/humble/setup.bash \
+ && cd /ros2_ws \
+ && colcon build --symlink-install
+
+RUN echo "source /ros2_ws/install/setup.bash" >> ~/.bashrc
+
+# Set up a workspace directory
+WORKDIR /ros2_ws/
+
+# Set environment variables
+ENV ROS_DOMAIN_ID=1
+ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+
+#CMD ["ros2", "launch", "fastbot_slam", "navigation.launch.py"]
+CMD ["bash"]
