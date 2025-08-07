@@ -60,7 +60,7 @@ var app = new Vue({
                 this.loading = false
                 //this.setupMap()
                 this.setup3DViewer()
-                //this.setupMapIn3DViewer()
+                this.setupMapIn3DViewer()
                 this.setupCamera()
                 this.pubInterval = setInterval(this.publish, 100)
                 this.subscribeToOdometry()
@@ -98,8 +98,8 @@ var app = new Vue({
             // Initialize map viewer
             this.mapViewer = new ROS2D.Viewer({
                 divID: 'map',
-                width: 420,
-                height: 360
+                width: 400, //420,
+                height: 400 //360
             });
             // Setup the map client
             this.mapGridClient = new ROS2D.OccupancyGridClient({
@@ -134,10 +134,10 @@ var app = new Vue({
             this.viewer = new ROS3D.Viewer({
                 background: '#cccccc',
                 divID: 'div3DViewer',
-                width: 400,
-                height: 300,
+                width: 400, //400,
+                height: 400, //300,
                 antialias: true,
-                fixedFrame: 'fastbot_odom' //'map' //'fastbot_1_odom'
+                fixedFrame: 'map' //'fastbot_odom'
             })
 
             // Add a grid.
@@ -165,7 +165,7 @@ var app = new Vue({
                 angularThres: 0.01,
                 transThres: 0.01,
                 rate: 10.0,
-                fixedFrame: 'fastbot_base_link' //'map' //'fastbot_1_base_link'
+                fixedFrame: 'map' //'fastbot_base_link'
             })
 
             // Setup the URDF client.
@@ -202,8 +202,8 @@ var app = new Vue({
                     let viewer = new MJPEGCANVAS.Viewer({
                         divID: 'divCamera',
                         host: host, // Use the host without port
-                        width: 320,
-                        height: 240,
+                        width: 800, //320,
+                        height: 800, //240,
                         topic: '/fastbot_camera/image_raw',
                         ssl: true,
                     });
