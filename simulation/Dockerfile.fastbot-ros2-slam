@@ -15,8 +15,6 @@ RUN apt update && apt install -y \
     ros-humble-xacro \
     ros-humble-tf2-ros \
     ros-humble-tf2-tools \
-    ros-humble-ros2-control \
-    ros-humble-ros2-controllers \
     ros-humble-rmw-cyclonedds-cpp \
     ros-humble-cartographer \
     ros-humble-cartographer-ros \

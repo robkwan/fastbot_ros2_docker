@@ -1,7 +1,11 @@
 # How to create the docker image: docker build -t my_nginx:v0 .
 
 # Let's use "ubuntu:20.04" as the base of our image
-FROM ubuntu:20.04
+#FROM ubuntu:20.04
+FROM osrf/ros:humble-desktop
+
+# Change the default shell to Bash
+SHELL [ "/bin/bash" , "-c" ]
 
 # Exporting a variable to install pkgs without any interactive questions
 ENV DEBIAN_FRONTEND=noninteractive
@@ -9,9 +13,20 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Set environment variables
 ENV ROS_DOMAIN_ID=1
 
-# Installing nginx
+# Installing nginx & web video server
 RUN apt-get update \
     && apt-get install -y nginx  \
+        ros-humble-ros2-control \
+        ros-humble-ros2-controllers \
+        ros-humble-rmw-cyclonedds-cpp \
+        python3-colcon-common-extensions \
+        ffmpeg \
+        ros-humble-async-web-server-cpp \
+        ros-humble-web-video-server \
+        python3-rosdep \
+        python3-rosinstall \
+        python3-rosinstall-generator \
+        python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
 # Copying the local entrypoint.sh file to /entrypoint.sh in the docker image
@@ -19,6 +34,46 @@ COPY ./entrypoint.sh /entrypoint.sh
 
 # Copying the local my_webpage to /var/www/html in the docker image
 COPY ./fastbot_webapp /var/www/html
+
+# Create workspace and download simulation repository
+
+RUN source /opt/ros/humble/setup.bash \
+ && mkdir -p /ros2_ws/src \
+ && cd /ros2_ws/src 
+
+# Create necessary directories
+
+RUN mkdir -p /ros2_ws/src/tf2_web_republisher_py 
+RUN mkdir -p /ros2_ws/src/rosbridge_suite 
+
+# Copy your simulation package
+COPY ./tf2_web_republisher_py/ /ros2_ws/src/tf2_web_republisher_py
+
+# Package needed for tf2_web_republisher_py
+RUN pip3 install pymongo
+RUN pip3 install tornado
+
+# Copy your simulation package
+COPY ./rosbridge_suite/ /ros2_ws/src/rosbridge_suite
+
+# Build the Colcon workspace and ensure it's sourced
+RUN source /opt/ros/humble/setup.bash \
+ && cd /ros2_ws \
+ && colcon build --symlink-install
+
+RUN echo "source /ros2_ws/install/setup.bash" >> ~/.bashrc
+
+# Package needed for tf2_web_republisher_py
+RUN pip3 install pyquaternion
+
+# Set up a workspace directory
+WORKDIR /ros2_ws/
+
+# Set environment variables
+ENV ROS_DOMAIN_ID=1
+ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+
+#CMD ["ros2", "launch", "fastbot_slam", "navigation.launch.py"]
 
 # /bin/bash is the command we want to execute when running a docker container
 ENTRYPOINT ["/bin/bash"]
