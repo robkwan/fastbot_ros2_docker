@@ -1,6 +1,7 @@
 # File: Dockerfile.fastbot-ros2-slam
 # Base image
-FROM osrf/ros:humble-desktop
+#FROM osrf/ros:humble-desktop
+FROM arm64v8/ros:humble-ros-base-jammy
 
 # Change the default shell to Bash
 SHELL [ "/bin/bash" , "-c" ]
@@ -30,9 +31,9 @@ RUN apt update && apt install -y \
 
 # Create workspace and download simulation repository
 
-RUN source /opt/ros/humble/setup.bash \
- && mkdir -p /ros2_ws/src/fastbot_slam \
- && cd /ros2_ws/src 
+#RUN source /opt/ros/humble/setup.bash \
+# && mkdir -p /ros2_ws/src/fastbot_slam \
+# && cd /ros2_ws/src 
 
 # Copy your simulation package
 COPY ./fastbot_slam/ /ros2_ws/src/fastbot_slam
@@ -48,8 +49,9 @@ RUN echo "source /ros2_ws/install/setup.bash" >> ~/.bashrc
 WORKDIR /ros2_ws/
 
 # Set environment variables
-ENV ROS_DOMAIN_ID=1
-ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+#ENV ROS_DOMAIN_ID=1
+#ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 
+#CMD ["bash", "-c", "source /ros2_ws/install/setup.bash && ros2 launch fastbot_slam navigation.launch.py"]
 #CMD ["ros2", "launch", "fastbot_slam", "navigation.launch.py"]
 CMD ["bash"]

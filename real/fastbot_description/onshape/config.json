@@ -1,0 +1,8 @@
+{
+    "documentId": "4757b8f98f7afcc7c3655639", # replace with your own (24-digit string after https://cad.onshape.com/documents/)
+    "url": "https://cad.onshape.com/documents/4757b8f98f7afcc7c3655639/w/684b05ef017e615d3bca90ce/e/15599f7046132dd76e692f13",
+    "outputFormat": "urdf",
+    "packageName": "fastbot_description/onshape",
+    "robotName": "fastbot",
+    "assemblyName": "fastbot-student"
+}

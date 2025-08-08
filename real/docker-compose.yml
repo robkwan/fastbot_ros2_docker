@@ -1,33 +1,7 @@
 # File: docker-compose.yml
-version: '3'
+version: '3.8'
 
 services:
-  fastbot-ros2-gazebo:
-    build:
-      context: .
-      dockerfile: Dockerfile.fastbot-ros2-gazebo
-    image: stud/stud-cp22:fastbot-ros2-gazebo
-    container_name: fastbot-ros2-gazebo
-    network_mode: bridge
-    environment:
-      - DISPLAY=${DISPLAY}
-      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-      - ROS_DOMAIN_ID=1
-      - GAZEBO_MASTER_URI=${GAZEBO_MASTER_URI}
-      - GAZEBO_PLUGIN_PATH=${GAZEBO_PLUGIN_PATH}
-      - GAZEBO_MODEL_DATABASE_URI=${GAZEBO_MODEL_DATABASE_URI}
-      - GAZEBO_RESOURCE_PATH=${GAZEBO_RESOURCE_PATH}
-      - GAZEBO_MODEL_PATH=/models:/assets:/ros2_ws/src:/.gazebo/models
-      - QT_XCB_GLUE_ALWAYS_IN_USE=1
-      - QT_X11_NO_MITSHM=1
-    volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix
-      - $HOME/ros2_ws/install/fastbot_description/share/fastbot_description/onshape/assets:/assets
-      - $HOME/ros2_ws/install/fastbot_description/share/fastbot_description/models:/models
-      - $HOME/.gazebo/models:/.gazebo/models
-      - $HOME/.Xauthority:/root/.Xauthority:rw
-    command: bash -c "cd /ros2_ws && colcon build && source install/setup.bash && ros2 launch fastbot_gazebo one_fastbot_room.launch.py"
-
   fastbot-ros2-real:
     build:
       context: .
@@ -35,7 +9,30 @@ services:
     image: stud/stud-cp22:fastbot-ros2-real
     container_name: fastbot-ros2-real
     network_mode: bridge
-    command: bash -c "cd /ros2_ws && colcon build && source install/setup.bash && ros2 launch fastbot_bringup bringup.launch.xml"
+    restart: always  # <-- Enable auto-restart
+    devices:
+      - /dev/video0:/dev/video0
+      - /dev/ttyACM0:/dev/lslidar
+      - /dev/ttyUSB0:/dev/arduino_nano
+    environment:
+      - DISPLAY=${DISPLAY}
+      #- RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      #- ROS_DOMAIN_ID=1
+      #- GAZEBO_MASTER_URI=${GAZEBO_MASTER_URI}
+      #- GAZEBO_PLUGIN_PATH=${GAZEBO_PLUGIN_PATH}
+      #- GAZEBO_MODEL_DATABASE_URI=${GAZEBO_MODEL_DATABASE_URI}
+      #- GAZEBO_RESOURCE_PATH=${GAZEBO_RESOURCE_PATH}
+      #- GAZEBO_MODEL_PATH=/models:/assets:/ros2_ws/src:/.gazebo/models
+      #- QT_XCB_GLUE_ALWAYS_IN_USE=1
+      #- QT_X11_NO_MITSHM=1
+    #volumes:
+      #- /tmp/.X11-unix:/tmp/.X11-unix
+      #- $HOME/ros2_ws/install/fastbot_description/share/fastbot_description/onshape/assets:/assets
+      #- $HOME/ros2_ws/install/fastbot_description/share/fastbot_description/models:/models
+      #- $HOME/.gazebo/models:/.gazebo/models
+      #- $HOME/.Xauthority:/root/.Xauthority:rw
+    #command: bash -c "source install/setup.bash && ros2 launch fastbot_bringup bringup.launch.xml"
+    privileged: true           
 
   fastbot-ros2-real-slam:
     build:
@@ -44,4 +41,5 @@ services:
     image: stud/stud-cp22:fastbot-ros2-real-slam
     container_name: fastbot-ros2-real-slam
     network_mode: bridge
-    command: bash -c "cd /ros2_ws && colcon build && source install/setup.bash && ros2 launch fastbot_slam cartographer.launch.py"
+    restart: always  # <-- Enable auto-restart
+    command: bash -c "source install/setup.bash && ros2 launch fastbot_slam cartographer.launch.py"
