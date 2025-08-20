@@ -3,10 +3,7 @@ version: '3'
 
 services:
   fastbot-ros2-gazebo:
-    build:
-      context: .
-      dockerfile: Dockerfile.fastbot-ros2-gazebo
-    image: stud/stud-cp22:fastbot-ros2-gazebo
+    image: robertkwan/fastbot-ros2-docker-sim:fastbot-ros2-gazebo
     container_name: fastbot-ros2-gazebo
     network_mode: bridge
     environment:
@@ -28,19 +25,13 @@ services:
     command: bash -c "cd /ros2_ws && colcon build && source install/setup.bash && ros2 launch fastbot_gazebo one_fastbot_room.launch.py"
 
   fastbot-ros2-slam:
-    build:
-      context: .
-      dockerfile: Dockerfile.fastbot-ros2-slam
-    image: stud/stud-cp22:fastbot-ros2-slam
+    image: robertkwan/fastbot-ros2-docker-sim:fastbot-ros2-slam
     container_name: fastbot-ros2-slam
     network_mode: bridge
     command: bash -c "cd /ros2_ws && colcon build && source install/setup.bash && ros2 launch fastbot_slam cartographer.launch.py"
 
   fastbot-ros2-webapp:
-    build:
-      context: .
-      dockerfile: Dockerfile.fastbot-ros2-webapp
-    image: stud/stud-cp22:fastbot-ros2-webapp
+    image: robertkwan/fastbot-ros2-docker-sim:fastbot-ros2-webapp
     container_name: fastbot-ros2-webapp
     ports:
       - "7000:80"
