@@ -1,6 +1,8 @@
+
 # File: Dockerfile.fastbot-ros2-slam
 # Base image
-FROM osrf/ros:humble-desktop
+#FROM osrf/ros:humble-desktop
+FROM arm64v8/ros:humble-ros-base-jammy
 
 # Change the default shell to Bash
 SHELL [ "/bin/bash" , "-c" ]
@@ -15,16 +17,36 @@ RUN apt update && apt install -y \
     ros-humble-tf2-tools \
     ros-humble-rmw-cyclonedds-cpp \
     python3-colcon-common-extensions \
+    ros-humble-v4l2-camera \ 
+    ros-humble-image-transport-plugins \
+    v4l-utils \
+    libboost-all-dev \
+    libboost-thread-dev \
+    libboost-system-dev \
+    libboost-filesystem-dev \
+    libpcl-dev \
+    ros-humble-diagnostic-updater \
+    libpcap-dev \
+    libeigen3-dev \
+    ros-humble-pcl-conversions \
+    python3-serial \    
     && rm -rf /var/lib/apt/lists/*
 
 # Create workspace and download simulation repository
 
-RUN source /opt/ros/humble/setup.bash \
- && mkdir -p /ros2_ws/src/fastbot_bringup \
- && cd /ros2_ws/src 
+#RUN source /opt/ros/humble/setup.bash \
+# && mkdir -p /ros2_ws/src/fastbot_bringup \
+# && mkdir -p /ros2_ws/src/Lslidar_ROS2_driver \
+# && mkdir -p /ros2_ws/src/serial_motor \
+# && mkdir -p /ros2_ws/src/serial_motor_msgs \
+#  && cd /ros2_ws/src 
 
 # Copy your simulation package
+COPY ./fastbot_description/ /ros2_ws/src/fastbot_description
 COPY ./fastbot_bringup/ /ros2_ws/src/fastbot_bringup
+COPY ./Lslidar_ROS2_driver/ /ros2_ws/src/Lslidar_ROS2_driver
+COPY ./serial_motor/ /ros2_ws/src/serial_motor
+COPY ./serial_motor_msgs/ /ros2_ws/src/serial_motor_msgs
 
 # Build the Colcon workspace and ensure it's sourced
 RUN source /opt/ros/humble/setup.bash \
@@ -37,8 +59,9 @@ RUN echo "source /ros2_ws/install/setup.bash" >> ~/.bashrc
 WORKDIR /ros2_ws/
 
 # Set environment variables
-ENV ROS_DOMAIN_ID=1
-ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+# ENV ROS_DOMAIN_ID=1
+# ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 
-#CMD ["ros2", "launch", "fastbot_slam", "navigation.launch.py"]
-CMD ["bash"]
+# Source setup in CMD (critical for ROS commands)
+CMD ["bash", "-c", "source /ros2_ws/install/setup.bash && ros2 launch fastbot_bringup bringup.launch.xml"]
+#CMD ["bash"]
