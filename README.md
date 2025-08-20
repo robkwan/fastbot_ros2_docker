@@ -20,20 +20,23 @@
    a newer docker engine and the docker compose v2 are used.
 
    For installation,
+   ```bash
+   sudo apt-get install docker.io=27.5.1-0ubuntu3~22.04.2 docker-compose-plugin=2.39.1-1~ubuntu.22.04~jammy  
 
-   sudo apt-get install docker.io=27.5.1-0ubuntu3~22.04.2 docker-compose-plugin=2.39.1-1~ubuntu.22.04~jammy
+
+   It may be other than jammy if it is a different Ubuntu like focal, 
 
    For holding the versions to prevent upgrades,
-
+   ```bash
    sudo apt-mark hold docker.io docker-compose-plugin
 
     For Verification,
-
+    ```bash
     docker --version
     docker compose version
 
     Expected Outputs:
-    =================
+  
     Docker version 27.5.1, build ...
 
     Docker Compose version v2.39.1
