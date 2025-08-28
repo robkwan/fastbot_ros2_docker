@@ -21,25 +21,19 @@
 
    For installation,
    ```bash
-   sudo apt-get install docker.io=27.5.1-0ubuntu3~22.04.2 docker-compose-plugin=2.39.1-1~ubuntu.22.04~jammy  
-   ```
-   It may be other than jammy if it is a different Ubuntu like focal, 
-
-   For holding the versions to prevent upgrades,
-   ```bash
-   sudo apt-mark hold docker.io docker-compose-plugin
+   sudo apt-get install docker.io docker-compose 
    ```
    For Verification,
     ```bash
     docker --version
-    docker compose version
+    docker-compose version
     ```
     
     Expected Outputs:
   
     Docker version 27.5.1, build ...
 
-    Docker Compose version v2.39.1
+    docker-compose version 1.29.2, build unknown
 
    For running the docker,
 
@@ -47,9 +41,14 @@
 
    ii. git clone https://github.com/robkwan/fastbot_ros2_docker.git
    
-   iii. docker compose up
-
-   iii. docker ps
-
+   iii. cd real/
    
+   iv. docker-compose up
 
+   v. docker ps
+
+   In order to view the "ros2 topic list" correctly, it is found that the following settings may be needed:-
+
+   - export ROS_IPV6=off
+   - export ROS_DOMAIN_ID=1
+   - unset CYCLONEDDS_URI
