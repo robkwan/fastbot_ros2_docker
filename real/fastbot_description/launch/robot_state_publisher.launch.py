@@ -54,7 +54,7 @@ def launch_setup(context, *args, **kwargs):
         executable="robot_state_publisher",
         name=robot_state_publisher_name,
         emulate_tty=True,
-        parameters=[{"use_sim_time": True, "robot_description": xml}],
+        parameters=[{"use_sim_time": False, "robot_description": xml}],
         remappings=[
             ("/robot_description", robot_description_topic_name),
             ("/joint_states", joint_state_topic_name),
