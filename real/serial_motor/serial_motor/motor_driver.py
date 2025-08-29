@@ -13,6 +13,8 @@ from geometry_msgs.msg import Twist
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
 from serial_motor_msgs.msg import MotorVels, EncoderVals
+import tf2_ros
+from geometry_msgs.msg import TransformStamped
 
 
 class MotorDriver(Node):
@@ -71,6 +73,7 @@ class MotorDriver(Node):
         self.motor_vels_pub_ = self.create_publisher(MotorVels, "motor_vels", 10)
         self.encoder_pub_ = self.create_publisher(EncoderVals, "encoder_vals", 10)
         self.odom_pub_ = self.create_publisher(Odometry, "odom", 10)
+        self.tf_broadcaster = tf2_ros.TransformBroadcaster(self)   # <-- add this
 
         # Timer callback to continuously publish odometry
         self.create_timer(0.1, self._timer_callback, callback_group=self.callback_group)
@@ -88,6 +91,8 @@ class MotorDriver(Node):
         self.y = 0.0  # Position in y
         self.theta = 0.0  # Orientation (yaw)
         self.last_time = time.time()  # Last update time
+
+
 
         # Attempt to establish a serial connection; log error if unsuccessful.
         try:
@@ -226,7 +231,7 @@ class MotorDriver(Node):
             self.encoder_pub_.publish(enc_msg)
 
             # Publish odometry based on encoder readings
-            # self.publish_odometry()
+            self.publish_odometry()
 
     def publish_odometry(self) -> None:
         """Publish odometry data based on encoder readings."""
@@ -275,6 +280,16 @@ class MotorDriver(Node):
 
         # Publish message
         self.odom_pub_.publish(odom_msg)
+
+        # Also publish TF
+        t = TransformStamped()
+        t.header = odom_msg.header
+        t.child_frame_id = odom_msg.child_frame_id
+        t.transform.translation.x = self.x
+        t.transform.translation.y = self.y
+        t.transform.translation.z = 0.0
+        t.transform.rotation = odom_msg.pose.pose.orientation
+        self.tf_broadcaster.sendTransform(t)   # <-- add this
 
     def euler_to_quaternion(
         self, roll: float, pitch: float, yaw: float

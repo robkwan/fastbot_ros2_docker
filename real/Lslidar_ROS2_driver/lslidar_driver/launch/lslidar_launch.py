@@ -20,7 +20,10 @@ def generate_launch_description():
                                 emulate_tty=True,
                                 namespace='',
                                 parameters=[driver_dir],
-                                )
+                                remappings=[
+                                    ('scan', '/fastbot/scan')
+                                ]
+                  )
 
 
     rviz_dir = os.path.join(get_package_share_directory('lslidar_driver'), 'rviz', 'lslidar.rviz')
