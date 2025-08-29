@@ -35,6 +35,13 @@
 
     docker-compose version 1.29.2, build unknown
 
+   Notes:
+   Sometimes it may need to run a few times to avoid issues from docker-compose 
+   and so I also did "sudo apt-get install docker-compose-v2" and use "docker compose up/down" 
+   and it would also work fine for my setup.
+   However, it is almost impossible to capture all the potential issues here 
+   but need some patience to debug the root cause please.
+
    For running the docker,
 
    i. cd ~/ros2_ws/src/fastbot_ros2_docker
@@ -47,8 +54,20 @@
 
    v. docker ps
 
-   In order to view the "ros2 topic list" correctly, it is found that the following settings may be needed:-
+   In order to view the "ros2 topic list" correctly, it is found that the following settings would be needed:-
+
+   - unset CYCLONEDDS_URI
+   - ros2 daemon stop
+
+   for every terminal launched manually.
+
+   It not ok, please also apply:
 
    - export ROS_IPV6=off
    - export ROS_DOMAIN_ID=1
-   - unset CYCLONEDDS_URI
+
+   but I found that they would not resolve the issue without the first twos above after many trials.
+
+   
+
+
