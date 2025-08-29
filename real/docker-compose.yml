@@ -5,11 +5,11 @@ services:
     #build:
     #  context: .
     #  dockerfile: Dockerfile.fastbot-ros2-real
-    image: stud/stud-cp22:fastbot-ros2-real
-    #image: robertkwan/fastbot-ros2-docker-real:fastbot-ros2-real
+    #image: stud/stud-cp22:fastbot-ros2-real
+    image: robertkwan/fastbot-ros2-docker-real:fastbot-ros2-real
     container_name: fastbot-ros2-real
     network_mode: host
-    #restart: always
+    restart: always
     devices:
       - /dev/video0:/dev/video0
       - /dev/ttyACM0:/dev/lslidar
@@ -24,16 +24,16 @@ services:
     privileged: true
 
   fastbot-ros2-real-slam:
-    build:
-      context: .
-      dockerfile: Dockerfile.fastbot-ros2-real-slam
-    image: stud/stud-cp22:fastbot-ros2-real-slam
-    #image: robertkwan/fastbot-ros2-docker-real:fastbot-ros2-real-slam
+    #build:
+    #  context: .
+    #  dockerfile: Dockerfile.fastbot-ros2-real-slam
+    #image: stud/stud-cp22:fastbot-ros2-real-slam
+    image: robertkwan/fastbot-ros2-docker-real:fastbot-ros2-real-slam
     container_name: fastbot-ros2-real-slam
     depends_on:
       - fastbot-ros2-real
     network_mode: host
-    #restart: always
+    restart: always
     environment:
       - DISPLAY=${DISPLAY}
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
