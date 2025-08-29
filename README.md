@@ -68,6 +68,12 @@
 
    but I found that they would not resolve the issue without the first twos above after many trials.
 
-   
+   It is also found that after reboot, the "ros2 topic echo /map" may not work the first time probably due to the mismatched DDS timestamp resolution between LiDAR and Cartographer in two separate containers.
+  
+   And to get the "ros2 topic echo /map" work again, 
+   one would need to go to the /real folder and "docker-compose down" and "docker-compose up" again 
+   with the correct env variable settings above.   
+   After these, the "ros2 topic echo /map" would work again.
+
 
 
